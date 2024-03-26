@@ -1,24 +1,19 @@
 package com.avetharun.herbiary.entity.block;
 
 import com.avetharun.herbiary.ModItems;
-import com.avetharun.herbiary.block.ToolrackBlock;
 import com.avetharun.herbiary.screens.BackpackScreenHandler;
-import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -29,7 +24,6 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Quaternionf;
 
 public class BackpackBlockEntity extends BlockEntity {
     private static final String TAG_BACKPACK_ITEMS = "backpackItems";
@@ -85,8 +79,6 @@ public class BackpackBlockEntity extends BlockEntity {
             public void onClose(PlayerEntity player) {
                 if (player instanceof ServerPlayerEntity) {
                     saveInventoryToNbt(this.heldStacks);
-                    NbtCompound c = new NbtCompound();
-                    System.out.println("saved! " + backpack.writeNbt(c));
                 }
                 super.onClose(player);
             }

@@ -3,33 +3,36 @@ package com.avetharun.herbiary.client;
 import com.avetharun.herbiary.Herbiary;
 import com.avetharun.herbiary.Items.ItemEntities.HerbiarySpearItemRenderer;
 import com.avetharun.herbiary.Items.QuiverItem;
+import com.avetharun.herbiary.ModItems;
 import com.avetharun.herbiary.client.entity.*;
 import com.avetharun.herbiary.client.particle.FlintSparkParticle;
+import com.avetharun.herbiary.entity.ModEntityTypes;
 import com.avetharun.herbiary.entity.block.ToolrackBlockEntity;
 import com.avetharun.herbiary.hUtil.alib;
 import com.avetharun.herbiary.packet.HerbiaryBlockStateInitPacket;
 import com.avetharun.herbiary.packet.SwitchArrowTypePacket;
 import com.avetharun.herbiary.packet.UnlockItemNamePacket;
-import com.avetharun.herbiary.screens.BackpackScreenHandler;
-import com.avetharun.herbiary.ModItems;
-import com.avetharun.herbiary.entity.ModEntityTypes;
 import com.avetharun.herbiary.recipes.RecipesUtil;
+import com.avetharun.herbiary.screens.BackpackScreenHandler;
 import com.avetharun.herbiary.screens.WorkstationScreen;
+import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -47,12 +50,16 @@ import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -69,20 +76,22 @@ public class HerbiaryClient implements ClientModInitializer {
     private void onRenderHud(DrawContext matrixStack, float v) {
         // Render the overlay
         MinecraftClient.getInstance().getProfiler().push("status_overlay");
-        StatusOverlay.render(matrixStack);
         // Reset the text color to default
         InGameHud hud = MinecraftClient.getInstance().inGameHud;
+//        hud.renderOverlay(matrixStack, Identifier.of("al_herbiary","textures/gui/heat_overlay.png"), f);
         MinecraftClient.getInstance().getProfiler().pop();
 
     }
     public static Set<String> KnownPlants = Collections.newSetFromMap(new ConcurrentHashMap<>());
     @Override
     public void onInitializeClient() {
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+        });
         switchArrowTypeKeybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.herbiary.toggle_arrow_type", // The translation key of the keybinding's name
                 InputUtil.Type.KEYSYM, // The type of the keybinding, KEYSYM for keyboard, MOUSE for mouse.
                 GLFW.GLFW_KEY_V, // The keycode of the key
-                "category.examplemod.test" // The translation key of the keybinding's category.
+                "category.herbiary.keys" // The translation key of the keybinding's category.
         ));
         HudRenderCallback.EVENT.register(this::onRenderHud);
         ClientPlayNetworking.registerGlobalReceiver(Herbiary.UNLOCK_ITEM_PACKET_ID, (client, handler, buf, responseSender) -> {
@@ -160,6 +169,24 @@ public class HerbiaryClient implements ClientModInitializer {
             }
             if (Herbiary.clientRuntime < 0) {Herbiary.clientRuntime=0;}
             Herbiary.clientRuntime += MinecraftClient.getInstance().getTickDelta();
+        });
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+            @Override
+            public Identifier getFabricId() {
+                return new Identifier("al_herbiary:client_resources");
+            }
+
+            @Override
+            public void reload(ResourceManager manager) {
+                try {
+                    var credits_res = manager.getResourceOrThrow(new Identifier("al_herbiary:credits.json"));
+                    Herbiary.CREDITS_FILE = JsonParser.parseReader(credits_res.getReader()).getAsJsonObject();
+                    Herbiary.MOD_CREDITS = Herbiary.ModCredit.getCredits(Herbiary.CREDITS_FILE);
+                    Herbiary.LIB_CREDITS = Herbiary.ModCredit.getLibCredits(Herbiary.CREDITS_FILE);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         });
     }
     public static boolean isModelTransformationInHand(ModelTransformationMode mode) {

@@ -8,9 +8,11 @@ import net.minecraft.block.PillarBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -27,8 +29,19 @@ public class LogBlock extends PillarBlock {
         }
 
         @Override
+        protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+            super.appendProperties(builder.add(Properties.ENABLED));
+        }
+
+        @Override
+        public BlockState getPlacementState(ItemPlacementContext ctx) {
+            return super.getPlacementState(ctx).with(Properties.ENABLED, false);
+        }
+
+        @Override
         public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
             super.randomTick(state, world, pos, random);
+            if (!state.get(Properties.ENABLED)) {return;}
             if (random.nextBetween(0,100) > 95) {
                 var d = Direction.random(random);
                 var pos1 = pos.offset(d);

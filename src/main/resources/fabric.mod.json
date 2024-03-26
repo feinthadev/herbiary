@@ -3,7 +3,7 @@
   "id": "herbiary",
   "version": "${version}",
   "name": "Herbiary",
-  "description": "A mod that creates a more survival themed Minecraft. Adds herbs, new weapons, mobs, all in the theme of Vanilla Minecraft.\nRemoves fantasy elements from the base game in favor of a more realistic survival experience.",
+  "description": "A mod that creates a more survival themed Minecraft. Adds herbs, new weapons, mobs, all in the theme of Vanilla Minecraft.\nLocks fantasy elements from the base game behind difficult challenges in favor of a more realistic survival experience.",
   "authors": [
     "Avetharun"
   ],
@@ -20,6 +20,10 @@
     "main": [
       "com.avetharun.herbiary.Herbiary",
       "com.avetharun.dpu.DatapackUtils"
+    ],
+    "modmenu": [],
+    "rei_client": [
+      "com.avetharun.herbiary.rei.HerbiaryReiPlugin"
     ]
   },
   "mixins": [

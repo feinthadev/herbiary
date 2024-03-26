@@ -1,0 +1,132 @@
+{
+  "mods": {
+    "real-camera": {
+      "url": "https://modrinth.com/mod/real-camera/version/GGcKWTy5",
+      "name": "Real Camera",
+      "authors": ["xTracr"]
+    },
+    "elytra-trims": {
+      "url": "https://modrinth.com/mod/elytra-trims",
+      "name": "Elytra Trims",
+      "authors": ["KikuGie"]
+    },
+    "stoneworks": {
+      "url": "https://modrinth.com/mod/stoneworks",
+      "name": "Stoneworks",
+      "authors": ["Fuzs", "LunaPixelStudios (Studio)"]
+    },
+    "chalk": {
+      "url": "https://modrinth.com/mod/chalk",
+      "name": "Chalk (Fabric)",
+      "authors": ["DaFuqs"]
+    },
+    "chicken-nerf": {
+      "url": "https://modrinth.com/mod/chicken-nerf",
+      "name": "Chicken Nerf",
+      "authors": ["supersaiyansubtlety"]
+    },
+    "despawning-eggs-hatch": {
+      "url": "https://modrinth.com/mod/despawning-eggs-hatch",
+      "name": "Despawning Eggs Hatch",
+      "authors": ["Serilum"]
+    },
+    "modonomicon": {
+      "url": "https://modrinth.com/mod/modonomicon",
+      "name": "Modonomicon",
+      "version": "1.62.0",
+      "authors": ["klikli-dev"]
+    },
+    "planters": {
+      "url": "https://modrinth.com/mod/planter-boxes",
+      "name": "Fei's Planter Boxes",
+      "version": "1.0",
+      "authors": ["Feintha"]
+    },
+    "serene-seasons": {
+      "url": "https://modrinth.com/mod/serene-seasons",
+      "name": "Serene Seasons",
+      "version": "1.0",
+      "authors": ["Adubbz", "Forstride"]
+    },
+    "boat-item-view": {
+      "url": "https://modrinth.com/mod/boat-item-view",
+      "name": "Boat Item View",
+      "version": "1.0",
+      "authors": ["50ap5ud5"]
+    },
+    "lamb-dynamic-lights": {
+      "url": "https://modrinth.com/mod/lambdynamiclights",
+      "name": "LambDynamicLights",
+      "version": "1.0",
+      "authors": ["LambdAurora"]
+    },
+    "realistic-sleep": {
+      "url": "https://modrinth.com/mod/realisticsleep",
+      "name": "Realistic Sleep",
+      "version": "1.0",
+      "authors": ["Steveplays"]
+    },
+    "amplified-nether": {
+      "url": "https://modrinth.com/mod/amplified-nether",
+      "name": "Amplified Nether",
+      "version": "1.0",
+      "authors": ["Stardust Labs (Organization)"]
+    },
+    "terralith": {
+      "url": "https://modrinth.com/mod/terralith",
+      "name": "Terralith",
+      "authors": [
+        "Stardust Labs (Organization)"
+      ],
+      "version": "1.0"
+    }
+  },
+  "libraries": {
+    "regedit": {
+      "url": "https://modrinth.com/mod/regedit",
+      "name": "RegistryEdit",
+      "version": "1.0",
+      "authors": ["Feintha"]
+    },
+    "immediatelyfast": {
+      "url": "https://modrinth.com/mod/immediatelyfast",
+      "name": "ImmediatelyFast",
+      "version": "1.2.10+1.20.4-fabric",
+      "authors": ["RaphiMC"]
+    },
+    "wild-temperatures": {
+      "url": "https://modrinth.com/mod/wild-temperatures",
+      "name": "key's Wild Temperatures",
+      "authors": ["keyschain"]
+    },
+    "tooltipfix": {
+      "url": "https://modrinth.com/mod/tooltipfix",
+      "name": "ToolTipFix",
+      "authors": ["kryptonaught"]
+    },
+    "ambient-environment": {
+      "url": "https://modrinth.com/mod/ambient-environment",
+      "name": "Ambient Environment",
+      "authors": ["jaredlll08"]
+    },
+    "seamless": {
+      "url": "https://modrinth.com/mod/seamless",
+      "name": "Seamless",
+      "authors": ["LarsMans", "curryducker"]
+    },
+    "fallingleaves": {
+      "name": "Falling Leaves",
+      "url": "https://modrinth.com/mod/fallingleaves",
+      "authors": [
+        "randommcsomethin",
+        "BrekiTomasson",
+        "Fourmisain"
+      ]
+    },
+    "elytra-trims-extensions": {
+      "url": "https://modrinth.com/mod/elytra-trims-extension",
+      "name": "Elytra Trims",
+      "authors": ["KikuGie"]
+    }
+  }
+}

@@ -17,13 +17,14 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Unique;
 
 import java.lang.reflect.Method;
 import java.util.Random;
 
 public class FireDrillItem extends Item {
-    public FireDrillItem(Settings settings) {
+    public float chance = 0.2f;
+    public int minimumTries = 6;
+    public FireDrillItem(Settings settings, float chance_to_light, int minimumTries) {
         super(settings);
     }
     Random random = new Random(0);
@@ -60,13 +61,12 @@ public class FireDrillItem extends Item {
             p.pos = pos;
             p.hand = hand;
             p.stack = stack;
-            if (random.nextInt(0, 100) > 90) {
+            if (random.nextInt(0, 100) > 90 && stack.getDamage() % minimumTries == 0) {
                 p.succeeded = true;
-                world.playSound(playerEntity, blockPos, Herbiary.FLINT_FAIL, SoundCategory.BLOCKS, 0.7F, world.getRandom().nextFloat() * 0.4F + 0.8F);
+                world.playSound(playerEntity, blockPos, Herbiary.FLINT_SUCCEED, SoundCategory.BLOCKS, 0.7F, world.getRandom().nextFloat() * 0.4F + 0.8F);
             } else {
                 world.playSound(playerEntity, blockPos, Herbiary.FLINT_FAIL, SoundCategory.BLOCKS, 0.7F, world.getRandom().nextFloat() * 0.4F + 0.8F);
             }
-
             p.write(buf);
             ClientPlayNetworking.send(Herbiary.IGNITER_IGNITE_PACKET_ID, buf);
         } else {

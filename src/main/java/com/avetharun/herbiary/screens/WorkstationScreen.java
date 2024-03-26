@@ -1,51 +1,34 @@
 package com.avetharun.herbiary.screens;
 
-import com.avetharun.herbiary.hUtil.alib;
 import com.avetharun.herbiary.recipes.WorkstationRecipe;
-import com.google.gson.JsonParser;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.JsonOps;
-import io.wispforest.owo.ui.base.BaseOwoTooltipComponent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.tooltip.*;
-import net.minecraft.client.gui.widget.Positioner;
+import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
+import net.minecraft.client.gui.tooltip.OrderedTextTooltipComponent;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.item.BundleTooltipData;
-import net.minecraft.client.item.TooltipData;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.BundleItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix4f;
-import org.joml.Vector2ic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 public class WorkstationScreen extends HandledScreen<WorkstationScreenHandler> {
@@ -263,10 +246,8 @@ public class WorkstationScreen extends HandledScreen<WorkstationScreenHandler> {
             int k = x + j % 4 * 16;
             int l = j / 4;
             int m = y + l * 18 + 2;
-            matrices.push();
-            matrices.drawItemInSlot(MinecraftClient.getInstance().textRenderer, s, k, m);
-            matrices.pop();
-//            matrices.drawItem(s,k-2,m-2);
+//            matrices.drawItemInSlot(MinecraftClient.getInstance().textRenderer, s, k, m);
+            matrices.drawItem(s,k,m);
         }
 
     }

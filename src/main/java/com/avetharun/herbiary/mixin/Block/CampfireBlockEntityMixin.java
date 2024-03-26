@@ -1,31 +1,15 @@
 package com.avetharun.herbiary.mixin.Block;
 
-import com.avetharun.herbiary.ModItems;
-import com.avetharun.herbiary.hUtil.alib;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.CampfireBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.CampfireBlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.CampfireBlockEntityRenderer;
-import net.minecraft.client.util.ModelIdentifier;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Properties;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -45,7 +29,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Optional;
 import java.util.Stack;
 
 @Mixin(CampfireBlockEntity.class)
@@ -133,6 +116,9 @@ public abstract class CampfireBlockEntityMixin {
 
     @Inject(method="unlitServerTick", at=@At("HEAD"))
     private static void unlitTickMixin(World world, BlockPos pos, BlockState state, CampfireBlockEntity campfire, CallbackInfo ci){
+
+
+
         if (state.get(Properties.AGE_4) == 0) {
             if (campfire.getItemsBeingCooked().size() > 0) {
                 campfire.getItemsBeingCooked().forEach(stack -> {

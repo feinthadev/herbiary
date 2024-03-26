@@ -1,13 +1,19 @@
 {
   "variants": {
-    "type=bottom": {
-      "model": "al_herbiary:block/rot_slab"
-    },
-    "type=double": {
-      "model": "al_herbiary:block/rot_planks"
-    },
-    "type=top": {
-      "model": "al_herbiary:block/rot_slab_top"
-    }
+    "type=bottom": [
+      { "model": "al_herbiary:block/rot_slab" },
+      { "model": "al_herbiary:block/rot_slab_1" },
+      { "model": "al_herbiary:block/rot_slab_2" }
+    ],
+    "type=double": [
+      { "model": "al_herbiary:block/rot_planks" },
+      { "model": "al_herbiary:block/rot_planks_1" },
+      { "model": "al_herbiary:block/rot_planks_2" }
+    ],
+    "type=top": [
+      { "model": "al_herbiary:block/rot_slab_top" },
+      { "model": "al_herbiary:block/rot_slab_top_1" },
+      { "model": "al_herbiary:block/rot_slab_top_2" }
+    ]
   }
 }

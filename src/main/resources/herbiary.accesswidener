@@ -20,3 +20,11 @@ accessible field net/minecraft/block/entity/BlockEntityType blocks Ljava/util/Se
 
 accessible    method    net/minecraft/client/gui/DrawContext    drawTooltip    (Lnet/minecraft/client/font/TextRenderer;Ljava/util/List;IILnet/minecraft/client/gui/tooltip/TooltipPositioner;)V
 accessible    method    net/minecraft/world/GameRules$Visitor    visitBoolean    (Lnet/minecraft/world/GameRules$Key;Lnet/minecraft/world/GameRules$Type;)V
+accessible class net/minecraft/client/gui/widget/IconWidget$Texture
+accessible field net/minecraft/client/gui/widget/ClickableWidget hovered Z
+
+accessible field net/minecraft/client/resource/SplashTextResourceSupplier splashTexts Ljava/util/List;
+accessible field net/minecraft/recipe/CuttingRecipe ingredient Lnet/minecraft/recipe/Ingredient;
+accessible field net/minecraft/recipe/CuttingRecipe result Lnet/minecraft/item/ItemStack;
+accessible method net/minecraft/client/gui/DrawContext drawTexturedQuad (Lnet/minecraft/util/Identifier;IIIIIFFFFFFFF)V
+accessible method net/minecraft/client/gui/hud/InGameHud renderOverlay (Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/util/Identifier;F)V

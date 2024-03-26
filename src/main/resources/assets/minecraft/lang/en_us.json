@@ -22,5 +22,11 @@
   "item.al_herbiary.sleeping_bag": "Sleeping Bag",
   "item.al_herbiary.tent_bag": "Cloth Tent",
   "subtitles.block.beehive.drip": "Sticky substance drips",
-  "subtitles..pick_berries": "Herb pops"
+  "subtitles..pick_berries": "Herb pops",
+  "itemGroup.herbiary.main_group": "Herbiary - All Items",
+  "rei.workstation.heat_required" : "Heat rocks in a campfire to get Magma Blocks.",
+  "generic.workstation.heat_required": "Heat required",
+  "generic.workstation.heat_required_for_recipe": "Heat required for this recipe",
+  "item.generic.may_burn_you.1" : "This item may burn you.",
+  "item.generic.may_burn_you.2" : "Hold Leather in another hand to avoid this."
 }

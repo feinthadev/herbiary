@@ -1,9 +1,11 @@
 package com.avetharun.herbiary.block;
 
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.LecternBlock;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LecternBlockEntity;
-import net.minecraft.client.render.block.entity.LecternBlockEntityRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundCategory;

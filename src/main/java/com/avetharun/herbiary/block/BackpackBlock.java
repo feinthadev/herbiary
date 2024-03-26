@@ -11,9 +11,6 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -22,7 +19,6 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
 public class BackpackBlock extends BlockWithEntity {
@@ -40,12 +36,12 @@ public class BackpackBlock extends BlockWithEntity {
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
         return new BackpackBlockEntity(pos,state);
     }
+
     @Override
-    public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
+    public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
         var bp = world.getBlockEntity(pos, ModItems.BACKPACK_BLOCK_ENTITY).get();
         world.spawnEntity(new ItemEntity((World)world, pos.getX(), pos.getY(), pos.getZ(), bp.backpack));
-        super.onBroken(world, pos, state);
-        world.breakBlock(pos, false);
+        return super.onBreak(world, pos, state, player);
     }
 
     @Override

@@ -1,36 +1,25 @@
 package com.avetharun.herbiary.mixin.Item;
 
 import com.avetharun.herbiary.Herbiary;
-import com.avetharun.herbiary.HerbiarySoundEvents;
-import com.avetharun.herbiary.block.LampBlock;
 import com.avetharun.herbiary.packet.FlintIgniterIgnitePacket;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.advancement.criterion.Criteria;
-import net.minecraft.block.*;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FlintAndSteelItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.lang.reflect.Method;
 import java.util.Random;
@@ -78,7 +67,7 @@ public class FlintAndSteelMixin extends Item {
             p.stack = stack;
             if (random.nextInt(0, 100) > 85) {
                 p.succeeded = true;
-                world.playSound(playerEntity, blockPos, Herbiary.FLINT_FAIL, SoundCategory.BLOCKS, 0.7F, world.getRandom().nextFloat() * 0.4F + 0.8F);
+                world.playSound(playerEntity, blockPos, Herbiary.FLINT_SUCCEED, SoundCategory.BLOCKS, 0.7F, world.getRandom().nextFloat() * 0.4F + 0.8F);
             } else {
                 world.playSound(playerEntity, blockPos, Herbiary.FLINT_FAIL, SoundCategory.BLOCKS, 0.7F, world.getRandom().nextFloat() * 0.4F + 0.8F);
             }

@@ -38,25 +38,28 @@ public abstract class WolfEntityMixin {
     }
     @Unique
     int herbiary$ticksSinceLastGrowl = 0;
+    @Unique
+    boolean isAngryAtNearPlayer = false;
     @Inject(method="tick", at=@At("TAIL"))
     public void tickMethod(CallbackInfo ci) {
         WolfEntity e = (WolfEntity) (Object)this;
         PlayerEntity p = e.getWorld().getClosestPlayer(e.getX(), e.getY(), e.getZ(), 16, true);
         if (p == null) {
             return;
-        } else {
-            float d = (float) p.squaredDistanceTo(e);
-            if (herbiary$ticksSinceLastGrowl > 60 + e.getRandom().nextInt(20) && e.getAngryAt() == null) {
-                e.playSound(SoundEvents.ENTITY_WOLF_GROWL, 0.5f, 1f);
-                herbiary$ticksSinceLastGrowl = 0;
-            }
-            if (d < 8 * 8) {
-                Objects.requireNonNull(e.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).setBaseValue(.5f);
-                e.setAngryAt(p.getUuid());
-            }
         }
-        if (e.getAngryAt() != null && e.getWorld().getPlayerByUuid(e.getAngryAt()).isDead()) {
+        float d = (float) p.squaredDistanceTo(e);
+        if (herbiary$ticksSinceLastGrowl > 60 + e.getRandom().nextInt(20) && e.getAngryAt() == null) {
+            e.playSound(SoundEvents.ENTITY_WOLF_GROWL, 0.5f, 1f);
+            herbiary$ticksSinceLastGrowl = 0;
+        }
+        if (d < 8 * 8) {
+            Objects.requireNonNull(e.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).setBaseValue(.5f);
+            e.setAngryAt(p.getUuid());
+            isAngryAtNearPlayer = true;
+        }
+        if (d > 10 * 10 || e.getAngryAt() != null && e.getWorld().getPlayerByUuid(e.getAngryAt()).isDead()) {
             e.setAngryAt(null);
+            isAngryAtNearPlayer = false;
         }
         if (e.getAngryAt() == null) {Objects.requireNonNull(e.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)).setBaseValue(0.30000001192092896f);}
         herbiary$ticksSinceLastGrowl++;

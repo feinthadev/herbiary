@@ -3,9 +3,11 @@ package com.avetharun.herbiary;
 import com.avetharun.herbiary.Items.FlintIgniter;
 import com.avetharun.herbiary.Items.UnlockableNamedItem;
 import com.avetharun.herbiary.command.LearnCommand;
-import com.avetharun.herbiary.hUtil.*;
-import com.avetharun.herbiary.hUtil.ModStatusEffects.Bleed;
 import com.avetharun.herbiary.entity.ModEntityTypes;
+import com.avetharun.herbiary.hUtil.HerbDescriptor;
+import com.avetharun.herbiary.hUtil.ModStatusEffects.Bleed;
+import com.avetharun.herbiary.hUtil.Season;
+import com.avetharun.herbiary.hUtil.alib;
 import com.avetharun.herbiary.packet.FlintIgniterIgnitePacket;
 import com.avetharun.herbiary.packet.HerbiaryBlockStateInitPacket;
 import com.avetharun.herbiary.packet.SwitchArrowTypePacket;
@@ -13,39 +15,43 @@ import com.avetharun.herbiary.packet.UnlockItemNamePacket;
 import com.avetharun.herbiary.recipes.RecipesUtil;
 import com.avetharun.herbiary.screens.BackpackScreenHandler;
 import com.avetharun.herbiary.screens.WorkstationScreenHandler;
-import com.feintha.regedit.RegistryEditEvent;
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.context.CommandContext;
+import io.wispforest.owo.ui.base.BaseOwoScreen;
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.core.Insets;
+import io.wispforest.owo.ui.core.OwoUIAdapter;
+import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.core.Surface;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-import net.fabricmc.fabric.api.gamerule.v1.FabricGameRuleVisitor;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FlowerBlock;
-import net.minecraft.block.StonecutterBlock;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket;
 import net.minecraft.network.packet.s2c.play.OverlayMessageS2CPacket;
 import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.recipe.RecipeEntry;
@@ -62,22 +68,24 @@ import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.Difficulty;
+import net.minecraft.util.*;
+import net.minecraft.util.collection.Weight;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.SpawnSettings;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.poi.PointOfInterestType;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class Herbiary implements ModInitializer {
     public static RegistryKey<Registry<HerbDescriptor>> HERB_DESCRIPTOR_KEY;
@@ -189,8 +197,140 @@ public class Herbiary implements ModInitializer {
     public static DefaultParticleType FLINT_SPARK_SMOKE = FabricParticleTypes.simple();
     public static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess access) {}
     static boolean ALLOW_VANILLA_RECIPE_CRAFT_last = false;
+    public static final class ModCredit implements StringIdentifiable {
+        String modId = "unknown";
+        String modName;
+        String modUrl;
+        String modVersion;
+        ArrayList<String> modAuthors = new ArrayList<>();
+        public static ModCredit deserialize(JsonObject modCreditRef) {
+            ModCredit credit = new ModCredit();
+            credit.modName = JsonHelper.getString(modCreditRef, "name", "Name not specified");
+            credit.modUrl = JsonHelper.getString(modCreditRef, "url", "URL not specified");
+            credit.modVersion = JsonHelper.getString(modCreditRef, "version", "Version not specified");
+            if (modCreditRef.has("authors") && modCreditRef.get("authors").isJsonArray()) {
+                for (var elem : modCreditRef.getAsJsonArray("authors")) {
+                    credit.modAuthors.add(elem.getAsString());
+                }
+            }
+            return credit;
+        }
+        public static ArrayList<ModCredit> getCredits(JsonObject root) {
+            ArrayList<ModCredit> credits = new ArrayList<>();
+            var modsO = root.getAsJsonObject("mods");
+            for (var key : modsO.keySet()) {
+                ModCredit credit = deserialize(modsO.getAsJsonObject(key));
+                credit.modId = key;
+                credits.add(credit);
+            }
+            return credits;
+        }
+        public static ArrayList<ModCredit> getLibCredits(JsonObject root) {
+            ArrayList<ModCredit> credits = new ArrayList<>();
+            var modsO = root.getAsJsonObject("libraries");
+            for (var key : modsO.keySet()) {
+                ModCredit credit = deserialize(modsO.getAsJsonObject(key));
+                credit.modId = key;
+                credits.add(credit);
+            }
+            return credits;
+        }
+
+        @Override
+        public String asString() {
+            return modId;
+        }
+    }
+    public static JsonObject CREDITS_FILE;
+    public static ArrayList<ModCredit> MOD_CREDITS = new ArrayList<>();
+    public static ArrayList<ModCredit> LIB_CREDITS = new ArrayList<>();
+    public static class CreditsScreen extends BaseOwoScreen<FlowLayout> {
+
+        @Override
+        protected @NotNull OwoUIAdapter<FlowLayout> createAdapter() {
+            return OwoUIAdapter.create(this, Containers::verticalFlow);
+        }
+
+        @Override
+        protected void build(FlowLayout rootComponent) {
+            assert MinecraftClient.getInstance().currentScreen != null;
+            rootComponent.surface(Surface.OPTIONS_BACKGROUND);
+            var fl0 = Containers.verticalFlow(Sizing.expand(), Sizing.content());
+            fl0.padding(Insets.bottom(32));
+            var modContainer = Containers.collapsible(Sizing.fill(), Sizing.content(), Text.literal("Mods"), true);
+            for (var credit : MOD_CREDITS) {
+                var mod = Containers.collapsible(Sizing.content(), Sizing.content(), Text.literal(credit.modName).formatted(Formatting.BOLD), false);
+                if (!credit.modAuthors.isEmpty()) {
+                    var authorComponent = Containers.collapsible(Sizing.content(), Sizing.content(), Text.of("Authors"), false);
+                    for (var author : credit.modAuthors) {
+                        authorComponent.child(Components.label(Text.of(author)));
+                    }
+                    mod.child(authorComponent);
+                }
+                mod.padding(Insets.bottom(1));
+                boolean modrinth = credit.modUrl.contains("modrinth");
+                boolean curseforge = credit.modUrl.contains("curseforge");
+                if (!credit.modUrl.isEmpty()) {
+                    mod.child(Components.button(Text.of("View Mod on " + (modrinth ? "Modrinth" : curseforge ? "Curseforge" : "the author's website")), buttonComponent -> {
+                        Util.getOperatingSystem().open(credit.modUrl);
+                    }));
+                }
+                mod.padding(Insets.bottom(2));
+                modContainer.child(mod);
+//                fl1 = (ScrollContainer<FlowLayout>) fl1.child(mod);
+            }
+            rootComponent.child(Components.spacer());
+            var libContainer = Containers.collapsible(Sizing.fill(), Sizing.content(), Text.literal("Libraries").formatted(Formatting.ITALIC), false);
+            for (var lib : LIB_CREDITS) {
+
+                var mod = Containers.collapsible(Sizing.content(), Sizing.content(), Text.literal(lib.modName).formatted(Formatting.BOLD), false);
+                if (!lib.modAuthors.isEmpty()) {
+                    var authorComponent = Containers.collapsible(Sizing.content(), Sizing.content(), Text.of("Authors"), false);
+                    for (var author : lib.modAuthors) {
+                        authorComponent.child(Components.label(Text.of(author)));
+                    }
+                    mod.child(authorComponent);
+                }
+                mod.padding(Insets.bottom(1));
+                boolean modrinth = lib.modUrl.contains("modrinth");
+                boolean curseforge = lib.modUrl.contains("curseforge");
+                if (!lib.modUrl.isEmpty()) {
+                    mod.child(Components.button(Text.of("View Mod on " + (modrinth ? "Modrinth" : curseforge ? "Curseforge" : "the author's website")), buttonComponent -> {
+                        Util.getOperatingSystem().open(lib.modUrl);
+                    }));
+                }
+                mod.padding(Insets.bottom(2));
+                libContainer.child(mod);
+            }
+            fl0.child(modContainer);
+            fl0.child(libContainer);
+            var fl1 = Containers.verticalScroll(Sizing.fill(), Sizing.fill(), fl0);
+            var fl2 = Containers.verticalFlow(Sizing.fill(), Sizing.content()).child(Components.button(Text.literal("Back"), buttonComponent -> MinecraftClient.getInstance().currentScreen.close()).verticalSizing(Sizing.fixed(12)))
+                    .surface(Surface.VANILLA_TRANSLUCENT);
+            rootComponent.child(fl2);
+            rootComponent.child(fl1);
+
+        }
+    }
     @Override
     public void onInitialize() {
+        BiomeModifications.create(new Identifier("al_herbiary:modify_overworld")).add(ModificationPhase.POST_PROCESSING, BiomeSelectors.foundInOverworld(),
+            (biomeSelectionContext, biomeModificationContext) -> {
+                biomeModificationContext.getSpawnSettings().clearSpawns(SpawnGroup.MONSTER);
+            }
+        );
+        BiomeModifications.create(new Identifier("al_herbiary:modify_nether")).add(ModificationPhase.POST_PROCESSING, BiomeSelectors.foundInOverworld(),
+            (biomeSelectionContext, biomeModificationContext) -> {
+                if (BiomeSelectors.spawnsOneOf(Set.of(EntityType.PIGLIN)).test(biomeSelectionContext)) {
+                    biomeModificationContext.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(EntityType.ZOMBIE, Weight.of(4), 1, 2));
+                }
+            }
+        );
+        BiomeModifications.create(new Identifier("al_herbiary:modify_end")).add(ModificationPhase.POST_PROCESSING, BiomeSelectors.foundInTheEnd(),
+            (biomeSelectionContext, biomeModificationContext) -> {
+                biomeModificationContext.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(EntityType.CREEPER, Weight.of(4), 1, 2));
+            }
+        );
         RegistryOverrides.Override();
         BiomeModifications.addFeature(BiomeSelectors.tag(BiomeTags.IS_FOREST), GenerationStep.Feature.VEGETAL_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, new Identifier("al_herbiary","blueberry_bush")));
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
@@ -250,7 +390,7 @@ public class Herbiary implements ModInitializer {
         EntitySleepEvents.MODIFY_SLEEPING_DIRECTION.register((entity, sleepingPos, sleepingDirection) -> {
             var ents = alib.getEntitiesOfTypeInRange(entity.getWorld(), sleepingPos, 1.25f, ModEntityTypes.TENT_ENTITY_TYPE);
             if (ents.size() > 0) {
-                return ents.get(0).getFacing();
+                return ents.get(0).getFacing().rotateClockwise(Direction.Axis.Y);
             }
             return sleepingDirection;
         });
@@ -258,7 +398,6 @@ public class Herbiary implements ModInitializer {
             // spawn owls
             getCurrentSeasonWorld(world);
         });
-
         HERB_DESCRIPTOR_KEY = RegistryKey.ofRegistry(new Identifier("herb_descriptor"));
         HERB_DESCRIPTORS = FabricRegistryBuilder.createSimple(HerbDescriptor.class, new Identifier("herb_descriptors")).buildAndRegister();
         Registry.register(HERB_DESCRIPTORS, new Identifier("empty"), EMPTY_OR_UNKNOWN_DESCRIPTOR);

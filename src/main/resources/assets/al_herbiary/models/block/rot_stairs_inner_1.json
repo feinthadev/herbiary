@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "al_herbiary:block/rot_planks_1",
+    "side": "al_herbiary:block/rot_planks_1",
+    "top": "al_herbiary:block/rot_planks_1"
+  }
+}

@@ -1,6 +1,7 @@
 package com.avetharun.herbiary;
 
 
+import com.avetharun.herbiary.Items.RockLikeItem;
 import com.avetharun.herbiary.block.LogBlock;
 import com.feintha.regedit.RegistryEditEvent;
 import com.feintha.regedit.RegistryManipulation;
@@ -12,7 +13,10 @@ import net.minecraft.block.enums.Instrument;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.*;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
@@ -20,8 +24,10 @@ import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -68,8 +74,21 @@ public class RegistryOverrides {
         }
     }
 
-    public static final CampfireBlock CAMPFIRE_BLOCK = new CampfireBlock(true, 3, AbstractBlock.Settings.create().mapColor(MapColor.SPRUCE_BROWN).instrument(Instrument.BASS).strength(2.0F).sounds(BlockSoundGroup.WOOD).luminance(state -> state.get(Properties.LIT) && (state.get(Properties.AGE_4) > 0) ? 10 : 0).nonOpaque().burnable());
+    public static final CampfireBlock CAMPFIRE_BLOCK = new CampfireBlock(true, 3, AbstractBlock.Settings.create().mapColor(MapColor.SPRUCE_BROWN).instrument(Instrument.BASS).strength(2.0F).sounds(BlockSoundGroup.WOOD).luminance(state -> state.get(Properties.LIT) && (state.get(Properties.AGE_4) > 0) ? 10 : 0).nonOpaque().burnable()) {
+        @Override
+        public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
+            return super.canPlaceAt(state, world, pos) && world.getBlockState(pos.down()).isSideSolid(world,pos.down(), Direction.UP, SideShapeType.RIGID);
+        }
 
+        @Override
+        public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
+            if (world.getBlockState(pos.down()).isAir()) {
+                world.breakBlock(pos, true);
+            }
+            super.neighborUpdate(state, world, pos, sourceBlock, sourcePos, notify);
+        }
+    };
+//
     public static final LogBlock OAK_LOG = new LogBlock.SapProducingLog(FabricBlockSettings.copyOf(Blocks.OAK_LOG).ticksRandomly());
     public static final LogBlock SPRUCE_LOG = new LogBlock.SapProducingLog(FabricBlockSettings.copyOf(Blocks.SPRUCE_LOG).ticksRandomly());
     public static final LogBlock ACACIA_LOG = new LogBlock(FabricBlockSettings.copyOf(Blocks.ACACIA_LOG));
@@ -105,7 +124,7 @@ public class RegistryOverrides {
     public static final PillarBlock STRIPPED_DARK_OAK_WOOD = new PillarBlock(FabricBlockSettings.copyOf(STRIPPED_DARK_OAK_LOG));
     public static final PillarBlock STRIPPED_CHERRY_WOOD = new PillarBlock(FabricBlockSettings.copyOf(STRIPPED_CHERRY_LOG));
     public static final PillarBlock STRIPPED_MANGROVE_WOOD = new PillarBlock(FabricBlockSettings.copyOf(STRIPPED_MANGROVE_LOG));
-
+    public static final Item FLINT_ITEM = new RockLikeItem(new Item.Settings());
     public static class CoolableBlock extends Block{
         public static class Heatable extends Block {
             public CoolableBlock hotVariant;
@@ -264,6 +283,8 @@ public class RegistryOverrides {
                 }
             }
             OverrideBlockAndItem(manipulator, Blocks.MAGMA_BLOCK, Items.MAGMA_BLOCK, new BlockItem(MAGMA_BLOCK, new Item.Settings()));
+            manipulator.Redirect(Registries.ITEM, Items.FLINT, FLINT_ITEM);
+            RockLikeItem.ROCK_CONVERSIONS.put(FLINT_ITEM, ModItems.SHARPENED_FLINT_ITEM);
         });
     }
 }

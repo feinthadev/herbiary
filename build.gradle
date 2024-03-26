@@ -46,6 +46,14 @@ repositories {
             includeGroup("com.eliotlash.mclib")
         }
     }
+
+    maven {
+        url "https://dl.cloudsmith.io/public/klikli-dev/mods/maven/"
+        content {
+            includeGroup "com.klikli_dev"
+        }
+    }
+    maven { url "https://maven.shedaniel.me/" }
 }
 
 dependencies {
@@ -57,16 +65,35 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     // Geckolib
-    include modImplementation('software.bernie.geckolib:geckolib-fabric-1.20.4:4.4.2')
-    compileOnly "maven.modrinth:modmenu:9.0.0"
+    include modApi('software.bernie.geckolib:geckolib-fabric-1.20.4:4.4.2')
+    include modImplementation("maven.modrinth:modmenu:9.0.0")
     modImplementation "io.wispforest:owo-lib:${project.owo_version}"
     annotationProcessor "io.wispforest:owo-lib:${project.owo_version}"
     include "io.wispforest:owo-sentinel:${project.owo_version}"
     include implementation(files("lib/mixinextras-fabric-0.2.0-beta.8.jar"))
     include annotationProcessor(files("lib/mixinextras-fabric-0.2.0-beta.8.jar"))
-    include modImplementation(files("lib/regedit.jar"))
     include modImplementation("maven.modrinth:planter-boxes:1.0")
+    include modImplementation("maven.modrinth:regedit:1.0.2")
+    include modImplementation("maven.modrinth:immediatelyfast:1.2.10+1.20.4-fabric")
+    include modImplementation("maven.modrinth:elytra-trims-extensions:2.0.0")
+    include modImplementation("maven.modrinth:elytra-trims:2.0.4")
+    include modImplementation("maven.modrinth:real-camera:GGcKWTy5")
+    include modImplementation("maven.modrinth:wild-temperatures:1.0.1-1.20.4")
+    include modImplementation("maven.modrinth:cloth-config:13.0.121+fabric")
+    include modImplementation("maven.modrinth:yeetus-experimentus:84.0.1")
 //    modImplementation "vazkii.patchouli:Patchouli:1.20.1-80-FABRIC-SNAPSHOT"
+
+
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:$rei_version"
+
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:$rei_version"
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:$rei_version"
+    modApi "dev.architectury:architectury-fabric:11.1.17"
+
+
+    modApi("me.shedaniel.cloth:basic-math:+")
+
+
 }
 
 processResources {

@@ -1,7 +1,26 @@
 {
   "variants": {
-    "": {
-      "model": "al_herbiary:block/rot_planks"
-    }
+    "": [
+      {
+        "model": "al_herbiary:block/rot_planks",
+        "weight": 4
+      },
+      {
+        "model": "al_herbiary:block/rot_planks_1",
+        "weight": 4
+      },
+      {
+        "model": "al_herbiary:block/rot_planks_2",
+        "weight": 4
+      },
+      {
+        "model": "al_herbiary:block/rot_planks_3",
+        "weight": 1
+      },
+      {
+        "model": "al_herbiary:block/rot_planks_4",
+        "weight": 1
+      }
+    ]
   }
 }

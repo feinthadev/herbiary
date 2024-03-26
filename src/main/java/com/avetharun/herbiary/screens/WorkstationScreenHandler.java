@@ -1,8 +1,8 @@
 package com.avetharun.herbiary.screens;
 
 import com.avetharun.herbiary.ModItems;
-import com.avetharun.herbiary.recipes.WorkstationRecipe;
 import com.avetharun.herbiary.recipes.RecipesUtil;
+import com.avetharun.herbiary.recipes.WorkstationRecipe;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,7 +14,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.Registries;
-import net.minecraft.screen.*;
+import net.minecraft.screen.Property;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -68,6 +71,11 @@ public class WorkstationScreenHandler extends ScreenHandler {
                 super.onTakeItem(player, stack);
                 WorkstationScreenHandler.this.populateResult();
             }
+            @Override
+            public void onQuickTransfer(ItemStack newItem, ItemStack original) {
+                super.onQuickTransfer(newItem, original);
+                WorkstationScreenHandler.this.populateResult();
+            }
         });
         this.outputSlot = this.addSlot(new Slot(this.output, 1, 143, 33) {
             public boolean canInsert(ItemStack stack) {
@@ -77,9 +85,11 @@ public class WorkstationScreenHandler extends ScreenHandler {
             @Override
             public boolean canTakeItems(PlayerEntity playerEntity) {
                 ItemStack r = WorkstationScreenHandler.this.inputRockSlot.getStack();
-                AtomicBoolean bl1 = new AtomicBoolean(WorkstationScreenHandler.this.isInBounds(WorkstationScreenHandler.this.getSelectedRecipe()) &&
-                        WorkstationScreenHandler.this.getAvailableRecipes().stream().anyMatch(workstationRecipeRecipeEntry -> workstationRecipeRecipeEntry.value().matchesTool(r)));
-                if (availableRecipes.size() == 0) {return false;}
+                AtomicBoolean bl1 = new AtomicBoolean(WorkstationScreenHandler.this.isInBounds(WorkstationScreenHandler.this.getSelectedRecipe()));
+                if (!bl1.get()) {return false;}
+                var rec = WorkstationScreenHandler.this.availableRecipes.get(getSelectedRecipe()).value();
+                bl1.set(bl1.get() & rec.requiredTool.test(r) && rec.ingredient.test(WorkstationScreenHandler.this.inputSlot.getStack()));
+                if (availableRecipes.isEmpty()) {return false;}
                 var rc = availableRecipes.get(WorkstationScreenHandler.this.getSelectedRecipe()).value();
                 if (bl1.get() && rc.requireHeat) {
                     context.run((world1, pos) -> {

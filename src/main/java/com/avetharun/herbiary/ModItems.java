@@ -14,14 +14,17 @@ import com.avetharun.herbiary.recipes.RecipesUtil;
 import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.*;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
@@ -29,18 +32,21 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Properties;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
 public class ModItems {
+    public static final Item SPEAR_ITEM = registerItem("spear", new SpearItem(new FabricItemSettings()
+            .maxDamage(120 /* 12 throws */)), Pair.of(ItemGroups.COMBAT, Items.TRIDENT));
     public static ArrayList<Block> RotLogGrowables = new ArrayList<>();
 
     // begin armor
@@ -51,14 +57,16 @@ public class ModItems {
 //    public static final Item WOLF_HIDE_BOOTS = registerItem("wolf_hide_boots", new ArmorItem(WOLF_HIDE_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Settings()), ItemGroups.COMBAT);
     // begin weapons
 
-    public static final Item BONE_KNIFE = registerItem("bone_knife", new SwordItem(ToolMaterials.WOOD, 3, 1.8f, new FabricItemSettings()
+    public static final Item BONE_KNIFE = registerItem("bone_knife", new SwordItem(ToolMaterials.WOOD, 3, .8f, new FabricItemSettings()
             .maxDamage(32)
     ), Pair.of(ItemGroups.COMBAT, Items.WOODEN_SWORD));
 
-    public static final Item METAL_KNIFE = registerItem("metal_knife", new SwordItem(ToolMaterials.STONE, 4, 1.6f, new FabricItemSettings()
+
+    public static final Item METAL_KNIFE = registerItem("metal_knife", new SwordItem(ToolMaterials.STONE, 4, .6f, new FabricItemSettings()
             .maxDamage(48)
     ), Pair.of(ItemGroups.COMBAT, Items.IRON_SWORD));
     public static final Item LONGBOW = registerItem("longbow", new BowItem(new Item.Settings().maxDamage(480)), Pair.of(ItemGroups.COMBAT, Items.BOW));
+    public static final Item BOW_DRILL = registerItem("bow_drill", new FireDrillItem(new Item.Settings().maxDamage(32), 0.5f, 4), Pair.of(ItemGroups.TOOLS, Items.FLINT_AND_STEEL));
     // begin tools
 
 //    public static final ModBlockItem IRON_SKILLET = registerBlockAsCreativeOnlyWithItem(new HorizontalFacingBlock(FabricBlockSettings.create()) {
@@ -83,7 +91,8 @@ public class ModItems {
     public static final Item LEATHER_FLASK = registerItem("leather_flask", new FlaskItem(new Item.Settings().maxCount(1)), Pair.of(ItemGroups.TOOLS, Items.BUCKET));
     public static final Item STONE_HATCHET = registerItem("stone_hatchet", new HatchetItem(ToolMaterials.STONE, 4, -3.5f, new Item.Settings().maxDamage(42)), Pair.of(ItemGroups.TOOLS, Items.STONE_AXE));
     public static final Item IRON_HATCHET = registerItem("iron_hatchet", new HatchetItem(ToolMaterials.IRON, 5, -2.5f, new Item.Settings().maxDamage(64)), Pair.of(ItemGroups.TOOLS, Items.IRON_AXE));
-    public static final Item IRON_HAMMER = registerItem("iron_hammer", new PickaxeItem(ToolMaterials.IRON, 3, -2.5f, new Item.Settings().maxDamage(75)), Pair.of(ItemGroups.TOOLS, Items.IRON_PICKAXE));
+    public static final Item IRON_HAMMER = registerItem("iron_hammer", new PickaxeItem(ToolMaterials.STONE, 3, -2.5f, new Item.Settings().maxDamage(75)), Pair.of(ItemGroups.TOOLS, Items.IRON_PICKAXE));
+    public static final Item STONE_HAMMER = registerItem("stone_hammer", new PickaxeItem(ToolMaterials.WOOD, 2, -2f, new Item.Settings().maxDamage(12)), Pair.of(ItemGroups.TOOLS, Items.STONE_PICKAXE));
 
     public static final Item AXE_MELTING_TEMPLATE = registerItem("axe_template", new Item(new Item.Settings().maxDamage(8)), Pair.of(ItemGroups.INGREDIENTS, Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE));
     public static final Item PICKAXE_MELTING_TEMPLATE = registerItem("pickaxe_template", new Item(new Item.Settings().maxDamage(8)), Pair.of(ItemGroups.INGREDIENTS, Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE));
@@ -92,30 +101,38 @@ public class ModItems {
     public static final ModBlockItem SMALL_BACKPACK = registerExistingBlockWithExistingItem(new BackpackBlock(FabricBlockSettings.create().breakInstantly().dropsNothing()), new SmallBackpackItem(new Item.Settings().maxCount(1)),"small_backpack",ItemGroups.TOOLS);
 
     // begin items
-    public static final Item BIRCH_BARK = registerItem("birch_bark", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS);
-    public static final Item OAK_BARK = registerItem("oak_bark", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS);
-    public static final Item JUNGLE_BARK = registerItem("jungle_bark", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS);
-    public static final Item DARK_OAK_BARK = registerItem("dark_oak_bark", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS);
-    public static final Item ACACIA_BARK = registerItem("acacia_bark", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS);
-    public static final Item CHERRY_BARK = registerItem("cherry_bark", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS);
-    public static final Item MANGROVE_BARK = registerItem("mangrove_bark", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS);
-    public static final Item SPRUCE_BARK = registerItem("spruce_bark", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS);
-    public static final Item BONE_SEWING_NEEDLE = registerItem("bone_sewing_needle", new Item(new FabricItemSettings()), ItemGroups.TOOLS, Items.FLINT_AND_STEEL);
+    public static final Item PLANT_FIBERS = registerItem("plant_fibers", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.PHANTOM_MEMBRANE));
+    public static final Item BIRCH_BARK = registerItem("birch_bark", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.DISC_FRAGMENT_5));
+    public static final Item OAK_BARK = registerItem("oak_bark", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.DISC_FRAGMENT_5));
+    public static final Item JUNGLE_BARK = registerItem("jungle_bark", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.DISC_FRAGMENT_5));
+    public static final Item DARK_OAK_BARK = registerItem("dark_oak_bark", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.DISC_FRAGMENT_5));
+    public static final Item ACACIA_BARK = registerItem("acacia_bark", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.DISC_FRAGMENT_5));
+    public static final Item CHERRY_BARK = registerItem("cherry_bark", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.DISC_FRAGMENT_5));
+    public static final Item MANGROVE_BARK = registerItem("mangrove_bark", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.DISC_FRAGMENT_5));
+    public static final Item SPRUCE_BARK = registerItem("spruce_bark", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.DISC_FRAGMENT_5));
+    public static final Item BONE_SEWING_NEEDLE = registerItem("bone_sewing_needle", new Item(new FabricItemSettings()), Pair.of(ItemGroups.TOOLS, Items.FLINT_AND_STEEL));
 
     public static final Item PLANT_FIBER_STRING = registerItem("plant_string", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.STRING));
     public static final Item FLEECE_ITEM = registerItem("fleece", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, PLANT_FIBER_STRING));
-    public static final Item BONE_SHARD = registerItem("bone_shard", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS, Items.BONE);
-    public static final Item LARGE_BONE = registerItem("large_bone", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS, Items.BONE);
-    public static final Item ANIMAL_FAT = registerItem("animal_fat", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS);
-    public static final Item WOLF_HIDE = registerItem("wolf_hide", new Item(new Item.Settings()), Pair.of(ItemGroups.INGREDIENTS, Items.RABBIT_HIDE));
+    public static final Item BONE_SHARD = registerItem("bone_shard", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.BONE));
+    public static final Item LARGE_BONE = registerItem("large_bone", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.BONE));
+    public static final Item ANIMAL_FAT = registerItem("animal_fat", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.HONEYCOMB));
+    public static final Item WOLF_HIDE = registerItem("wolf_hide", new Item(new Item.Settings()) {
+        @Override
+        public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+            super.appendTooltip(stack, world, tooltip, context);
+        }
+    }, Pair.of(ItemGroups.INGREDIENTS, Items.RABBIT_HIDE));
     public static final Item CLOTH = registerItem("cloth", new Item(new Item.Settings()), Pair.of(ItemGroups.INGREDIENTS, FLEECE_ITEM));
     public static final Item SINEW = registerItem("sinew", new Item(new Item.Settings()), Pair.of(ItemGroups.INGREDIENTS, Items.STRING));
     public static final Item ROCK_ITEM = registerItem("rock", new RockLikeItem(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.GOLD_NUGGET));
     public static final Item HOT_ROCK_ITEM = registerItem("heated_rock", new HotItem(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, ROCK_ITEM));
     public static final Item HARDWOOD_STICK = registerItem("hardwood_stick", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.STICK));
-    public static final Item SHARPENED_ROCK_ITEM = registerItem("sharpened_rock", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS);
-    public static final Item OBSIDIAN_ROCK_ITEM = registerItem("obsidian_rock", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS);
-    public static final Item SHARPENED_OBSIDIAN_ROCK_ITEM = registerItem("sharpened_obsidian_rock", new Item(new FabricItemSettings()), ItemGroups.INGREDIENTS);
+    public static final Item SHARPENED_ROCK_ITEM = registerItem("sharpened_rock", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, HOT_ROCK_ITEM));
+    public static final Item SHARPENED_STICK_ITEM = registerItem("sharpened_stick", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, HARDWOOD_STICK));
+    public static final Item SHARPENED_FLINT_ITEM = registerItem("sharpened_flint", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, RegistryOverrides.FLINT_ITEM));
+    public static final Item OBSIDIAN_ROCK_ITEM = registerItem("obsidian_rock", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, HOT_ROCK_ITEM));
+    public static final Item SHARPENED_OBSIDIAN_ROCK_ITEM = registerItem("sharpened_obsidian_rock", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, HOT_ROCK_ITEM));
     public static final Item SHARPENED_OBSIDIAN_ARROW_ITEM = registerItem("sharpened_obsidian_arrow", new SharpenedObsidianArrowItem(new FabricItemSettings()), ItemGroups.COMBAT);
     public static final Item FLOUR_ITEM = registerItem("flour", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.WHEAT));
     public static final Item SOOT_ITEM = registerItem("soot", new Item(new FabricItemSettings()), Pair.of(ItemGroups.INGREDIENTS, Items.FIRE_CHARGE));
@@ -314,8 +331,6 @@ public class ModItems {
         public static final Item RICE_BUNDLE = registerItem("rice_bundle", new Item(new FabricItemSettings()
                 .food(new FoodComponent.Builder().hunger(8).saturationModifier(5).build())), ItemGroups.FOOD_AND_DRINK);
 
-        public static final Item SPEAR_ITEM = registerItem("spear", new SpearItem(new FabricItemSettings()
-                .maxDamage(120 /* 12 throws */)), Pair.of(ItemGroups.COMBAT, Items.TRIDENT));
 
     public static EntityType<HerbiarySpearItemEntity> SPEAR_ENTITY_TYPE = Registry.register(
             Registries.ENTITY_TYPE, new Identifier("al_herbiary", "spear"), HerbiarySpearItemEntity.getEntityType());
@@ -532,15 +547,6 @@ public class ModItems {
         });
         return re_i;
     }
-    public static void registerModItemData() {
-        SpruceLogGrowables.addAll(List.of(new Block[]{
-                ModItems.HONEY_MUSHROOM.getLeft(),
-                ModItems.OYSTER_MUSHROOM.getLeft()
-        }));
-        RotLogGrowables.addAll(List.of(new Block[]{
-                ModItems.OYSTER_MUSHROOM.getLeft()
-        }));
-    }
 
     static {
         CATTAIL_PLANT = registerExistingBlockWithItemHerb(
@@ -665,4 +671,32 @@ public class ModItems {
         RockLikeItem.ROCK_CONVERSIONS.put(ModItems.ROCK_ITEM, ModItems.SHARPENED_ROCK_ITEM);
         HotItem.ITEM_CONVERSION.put(ModItems.HOT_ROCK_ITEM, ModItems.ROCK_ITEM);
     }
+
+    public static void registerModItemData() {
+        SpruceLogGrowables.addAll(List.of(new Block[]{
+                ModItems.HONEY_MUSHROOM.getLeft(),
+                ModItems.OYSTER_MUSHROOM.getLeft()
+        }));
+        RotLogGrowables.addAll(List.of(new Block[]{
+                ModItems.OYSTER_MUSHROOM.getLeft()
+        }));
+    }
+    private static final ItemGroup ITEM_GROUP = Registry.register(Registries.ITEM_GROUP, new Identifier("al_herbiary:main_group"), FabricItemGroup.builder()
+            .icon(() -> new ItemStack(SPEAR_ITEM))
+            .displayName(Text.translatable("itemGroup.herbiary.main_group"))
+            .entries((displayContext, entries) -> {
+                for (Field field : ModItems.class.getFields()) {
+                    try {
+                        Object f = field.get(null);
+                        if (f instanceof Item i ) {
+                            entries.add(i);
+                        } else if (f instanceof ModBlockItem mbi) {
+                            entries.add(mbi.getRight());
+                        }
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            })
+            .build());
 }

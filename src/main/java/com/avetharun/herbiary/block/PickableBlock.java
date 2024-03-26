@@ -1,6 +1,7 @@
 package com.avetharun.herbiary.block;
 
 import com.avetharun.herbiary.Herbiary;
+import com.avetharun.herbiary.interfaces.Pickable;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
 import net.minecraft.entity.player.PlayerEntity;
@@ -8,7 +9,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
@@ -23,7 +23,7 @@ import net.minecraft.world.WorldView;
 
 import java.util.function.BiConsumer;
 
-public class PickableBlock extends PlantBlock implements Fertilizable {
+public class PickableBlock extends PlantBlock implements Fertilizable, Pickable {
 
     public static final int MAX_AGE = 3;
     public static final IntProperty AGE;
@@ -53,11 +53,7 @@ public class PickableBlock extends PlantBlock implements Fertilizable {
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (state.get(AGE) == 3) {
-            world.setBlockState(pos, state.with(AGE, 0));
-            world.playSound(null, pos, SoundEvents.BLOCK_SWEET_BERRY_BUSH_PICK_BERRIES, SoundCategory.BLOCKS, 0.4f, 1.0f);
-            OnPicked.accept(pos, world);
-        }
+        onPick(state, world, pos, player, hand, hit);
         return super.onUse(state, world, pos, player, hand, hit);
     }
 
@@ -105,5 +101,14 @@ public class PickableBlock extends PlantBlock implements Fertilizable {
     @Override
     public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state) {
         world.setBlockState(pos, state.with(AGE, state.get(AGE)+1));
+    }
+
+    @Override
+    public void onPick(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if (state.get(AGE) == 3) {
+            world.setBlockState(pos, state.with(AGE, 0));
+            world.playSound(null, pos, SoundEvents.BLOCK_SWEET_BERRY_BUSH_PICK_BERRIES, SoundCategory.BLOCKS, 0.4f, 1.0f);
+            OnPicked.accept(pos, world);
+        }
     }
 }
